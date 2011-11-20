@@ -1,6 +1,7 @@
 /***
 |''Name''|TiddlyKanban|
 |''Description''|Renders tiddlers into a KANBAN and allows editing by drag-and-drop.|
+|''Maintainer''|Tim Barnes|
 |''Version''|0.9.0|
 |''Status''|stable|
 |''Source''|[[https://github.com/tim-barnes/TiddlyKanban]]|
@@ -180,38 +181,41 @@ if(!version.extensions.TiddlyKanban) {
 		//-- Called on drop from the dragsort function
 		//--
 		itemDrop: function()
-		{			
-			var id = this.attr('kanbanid');
-			var newParent = this.parent().attr('kanbanstate');
-			
-			//Get the tiddler from the store
-			var tiddler = store.getTiddler(id);
-			if (tiddler)
-			{
-				var oldTag = this.attr('kanbanstate');
+		{	
+			try {
+				var id = this.attr('kanbanid');
+				var newParent = this.parent().attr('kanbanstate');
 				
-				var tagIdx = tiddler.tags.indexOf(oldTag);
-				tiddler.tags[tagIdx] = newParent;
-				this.attr('kanbanstate', newParent);
-				
-				//Ensure the tiddler is saved
-				tiddler.incChangeCount();
-				tiddler.saveToDiv();
-				store.setDirty(id, true);
-				
-				if (config.options.chkAutoSave == true)
+				//Get the tiddler from the store
+				var tiddler = store.getTiddler(id);
+				if (tiddler)
 				{
-					saveChanges();
+					var oldTag = this.attr('kanbanstate');
+					
+					var tagIdx = tiddler.tags.indexOf(oldTag);
+					tiddler.tags[tagIdx] = newParent;
+					this.attr('kanbanstate', newParent);
+					
+					//Ensure the tiddler is saved
+					tiddler.incChangeCount();
+					tiddler.saveToDiv();
+					store.setDirty(id, true);
+					
+					if (config.options.chkAutoSave == true)
+					{
+						saveChanges();
+					}
+					
+					//Update all the kanbans
+					config.macros.kanban.tiddler_changed(id);
+				} else {
+					//Error case
+					alert("Something is wrong here: " + id + " could not be retrieved from the tiddler store!");
 				}
-				
-				//Update all the kanbans
-				config.macros.kanban.tiddler_changed(id);
-			}
-			else
-			{
-				//Error case
-				alert("Something is wrong here: " + id + " could not be retrieved from the tiddler store!");
-			}
+			} 
+        	catch(ex) {
+        		pluginInfo.log.push("Exception thrown when updating tiddler: " + tiddlerTitle + "\nException was:  " + ex.name + "\n" + ex.message);
+        	}
 		},
 		
 		//--
@@ -225,11 +229,11 @@ if(!version.extensions.TiddlyKanban) {
         		return;
         	}
         	
-         	var tiddler = store.getTiddler(tiddlerTitle);
-        	if (tiddler)
-        	{
-        		jQuery(".kanbancolumn").each(
-        			function (index) {
+        	try {
+	         	var tiddler = store.getTiddler(tiddlerTitle);
+	        	if (tiddler)
+	        	{
+	        		jQuery(".kanbancolumn").each(function (index) {
         				var state = jQuery(this).attr("kanbanstate");
         				
         				//Get all the matching workitems for this column
@@ -245,18 +249,20 @@ if(!version.extensions.TiddlyKanban) {
 	        				} else {
 	        					config.macros.kanban.create_workitem(tiddler, this, state);
 	        				}
-        				}
-        				else
-        				{
+        				} else {
         					//Work item is not in this kanban state
         					workItems.remove();
         				}
         			});
+	        	} 
+	        	else
+	        	{
+	        		//Tiddler was deleted, remove all on display.
+	  				jQuery(".kanbanworkitem[kanbanid=" + tiddlerTitle + "]").remove();
+	        	}
         	} 
-        	else
-        	{
-        		//Remove all
-  				jQuery(".kanbanworkitem[kanbanid=" + tiddlerTitle + "]").remove();
+        	catch(ex) {
+        		pluginInfo.log.push("Exception thrown when updating tiddler: " + tiddlerTitle + "\nException was:  " + ex.name + "\n" + ex.message);
         	}
         }
     };

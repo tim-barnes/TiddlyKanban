@@ -513,10 +513,11 @@ Also see [[AdvancedOptions]]</pre>
 <div title="Example" creator="Tim" modifier="Tim" created="201111201758" changecount="1">
 <pre>&lt;&lt;kanban Cat1 Cat2 Cat3&gt;&gt;</pre>
 </div>
-<div title="KanbanPlugin" creator="Tim" modifier="Tim" created="201111201756" modified="201111201858" tags="systemConfig" changecount="8">
+<div title="KanbanPlugin" creator="Tim" modifier="Tim" created="201111201756" modified="201111202120" tags="systemConfig" changecount="9">
 <pre>/***
 |''Name''|TiddlyKanban|
 |''Description''|Renders tiddlers into a KANBAN and allows editing by drag-and-drop.|
+|''Maintainer''|Tim Barnes|
 |''Version''|0.9.0|
 |''Status''|stable|
 |''Source''|[[https://github.com/tim-barnes/TiddlyKanban]]|
@@ -696,38 +697,41 @@ if(!version.extensions.TiddlyKanban) {
 		//-- Called on drop from the dragsort function
 		//--
 		itemDrop: function()
-		{			
-			var id = this.attr('kanbanid');
-			var newParent = this.parent().attr('kanbanstate');
-			
-			//Get the tiddler from the store
-			var tiddler = store.getTiddler(id);
-			if (tiddler)
-			{
-				var oldTag = this.attr('kanbanstate');
+		{	
+			try {
+				var id = this.attr('kanbanid');
+				var newParent = this.parent().attr('kanbanstate');
 				
-				var tagIdx = tiddler.tags.indexOf(oldTag);
-				tiddler.tags[tagIdx] = newParent;
-				this.attr('kanbanstate', newParent);
-				
-				//Ensure the tiddler is saved
-				tiddler.incChangeCount();
-				tiddler.saveToDiv();
-				store.setDirty(id, true);
-				
-				if (config.options.chkAutoSave == true)
+				//Get the tiddler from the store
+				var tiddler = store.getTiddler(id);
+				if (tiddler)
 				{
-					saveChanges();
+					var oldTag = this.attr('kanbanstate');
+					
+					var tagIdx = tiddler.tags.indexOf(oldTag);
+					tiddler.tags[tagIdx] = newParent;
+					this.attr('kanbanstate', newParent);
+					
+					//Ensure the tiddler is saved
+					tiddler.incChangeCount();
+					tiddler.saveToDiv();
+					store.setDirty(id, true);
+					
+					if (config.options.chkAutoSave == true)
+					{
+						saveChanges();
+					}
+					
+					//Update all the kanbans
+					config.macros.kanban.tiddler_changed(id);
+				} else {
+					//Error case
+					alert(&quot;Something is wrong here: &quot; + id + &quot; could not be retrieved from the tiddler store!&quot;);
 				}
-				
-				//Update all the kanbans
-				config.macros.kanban.tiddler_changed(id);
-			}
-			else
-			{
-				//Error case
-				alert(&quot;Something is wrong here: &quot; + id + &quot; could not be retrieved from the tiddler store!&quot;);
-			}
+			} 
+        	catch(ex) {
+        		pluginInfo.log.push(&quot;Exception thrown when updating tiddler: &quot; + tiddlerTitle + &quot;\nException was:  &quot; + ex.name + &quot;\n&quot; + ex.message);
+        	}
 		},
 		
 		//--
@@ -741,11 +745,11 @@ if(!version.extensions.TiddlyKanban) {
         		return;
         	}
         	
-         	var tiddler = store.getTiddler(tiddlerTitle);
-        	if (tiddler)
-        	{
-        		jQuery(&quot;.kanbancolumn&quot;).each(
-        			function (index) {
+        	try {
+	         	var tiddler = store.getTiddler(tiddlerTitle);
+	        	if (tiddler)
+	        	{
+	        		jQuery(&quot;.kanbancolumn&quot;).each(function (index) {
         				var state = jQuery(this).attr(&quot;kanbanstate&quot;);
         				
         				//Get all the matching workitems for this column
@@ -761,18 +765,20 @@ if(!version.extensions.TiddlyKanban) {
 	        				} else {
 	        					config.macros.kanban.create_workitem(tiddler, this, state);
 	        				}
-        				}
-        				else
-        				{
+        				} else {
         					//Work item is not in this kanban state
         					workItems.remove();
         				}
         			});
+	        	} 
+	        	else
+	        	{
+	        		//Tiddler was deleted, remove all on display.
+	  				jQuery(&quot;.kanbanworkitem[kanbanid=&quot; + tiddlerTitle + &quot;]&quot;).remove();
+	        	}
         	} 
-        	else
-        	{
-        		//Remove all
-  				jQuery(&quot;.kanbanworkitem[kanbanid=&quot; + tiddlerTitle + &quot;]&quot;).remove();
+        	catch(ex) {
+        		pluginInfo.log.push(&quot;Exception thrown when updating tiddler: &quot; + tiddlerTitle + &quot;\nException was:  &quot; + ex.name + &quot;\n&quot; + ex.message);
         	}
         }
     };
