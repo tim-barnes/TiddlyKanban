@@ -141,7 +141,7 @@ if(!version.extensions.TiddlyKanban) {
 				
 				//Create a new tiddler link at the base of each Kanban column
 				var newLink = "<<newTiddler tag:%0>>".format(state);
-				wikify(newLink, column);				
+				wikify(newLink, stateDiv);				
 			}
 			
 			//Enable drag and drop between columns
