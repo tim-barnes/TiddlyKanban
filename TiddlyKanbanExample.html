@@ -513,7 +513,7 @@ Also see [[AdvancedOptions]]</pre>
 <div title="Example" creator="Tim" modifier="Tim" created="201111201758" changecount="1">
 <pre>&lt;&lt;kanban Cat1 Cat2 Cat3&gt;&gt;</pre>
 </div>
-<div title="KanbanPlugin" creator="Tim" modifier="Tim" created="201111201756" modified="201111202120" tags="systemConfig" changecount="9">
+<div title="KanbanPlugin" creator="Tim" modifier="Tim" created="201111201756" modified="201111202144" tags="systemConfig" changecount="10">
 <pre>/***
 |''Name''|TiddlyKanban|
 |''Description''|Renders tiddlers into a KANBAN and allows editing by drag-and-drop.|
@@ -657,7 +657,7 @@ if(!version.extensions.TiddlyKanban) {
 				
 				//Create a new tiddler link at the base of each Kanban column
 				var newLink = &quot;&lt;&lt;newTiddler tag:%0&gt;&gt;&quot;.format(state);
-				wikify(newLink, column);				
+				wikify(newLink, stateDiv);				
 			}
 			
 			//Enable drag and drop between columns
@@ -783,9 +783,7 @@ if(!version.extensions.TiddlyKanban) {
         }
     };
 }
-//}}} 
-
-</pre>
+//}}}</pre>
 </div>
 <div title="MainMenu" creator="Tim" modifier="Tim" created="201111201749" modified="201111201749" changecount="2">
 <pre>KanbanPlugin
