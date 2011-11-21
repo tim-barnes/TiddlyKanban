@@ -29,6 +29,13 @@ This plugin would not be possible without the excellent dragsort ([[http://drags
 !TODO
 * Work card colours
 * Work card tracking
+User requests
+* min/max button for each tiddler, and a whole column min/max function
+* vertical size limit of work items
+* direct drop of links into kanban columns?!
+* Default CSS does not obey local stylesheet conventions - particularly obeying container height.
+* Saving position of tiddlers
+* Need to auto include [[StyleSheetKanbanPlugin]] into the [[StyleSheet]] tiddler.
 !Known Issues
 * Autoupdate does not work for tiddlers with spaces in the titles.
 !Code
