@@ -27,11 +27,11 @@ This plugin would not be possible without the excellent dragsort ([[http://drags
 !!v0.9 (2011-11-20)
 * initial release
 !!v0.9.1 (2011-11-24)
-* Fixed bug in dragsort that failed to recognise changes between lists
+* Fixed bug in dragsort that failed to recognise changes between lists.
+* Fixed issue with autoupdate of tiddlers with whitespace in the title.
 !TODO
 * Work card colours
 * Work card tracking
-User requests
 * min/max button for each tiddler, and a whole column min/max function
 * vertical size limit of work items
 * direct drop of links into kanban columns?
@@ -39,8 +39,10 @@ User requests
 * Create static copy of current kanban in new tiddler.
 * Wild card columns
 * Field based columns
+* Persist column order
+* Sort columns on tiddler modified date, field value?
 !Known Issues / bugs
-* Autoupdate does not work for tiddlers with spaces in the titles.
+* --Autoupdate does not work for tiddlers with spaces in the titles.--
 * --Tiddler does not always get updated on blank columns - broken itemDrop?--
 * Default CSS does not obey local stylesheet conventions - particularly container div height.
 * Need to auto include [[StyleSheetKanbanPlugin]] into the [[StyleSheet]] tiddler.
@@ -527,12 +529,6 @@ if(!version.extensions.TiddlyKanban) {
         //--
         tiddler_changed: function(tiddlerTitle)
         {
-        	//Guard against tiddler titles with spaces
-        	//Not supported for now
-        	if (tiddlerTitle.search(" ") != -1) {
-        		return;
-        	}
-        	
         	try {
 	         	var tiddler = store.getTiddler(tiddlerTitle);
 	        	if (tiddler)
@@ -541,7 +537,7 @@ if(!version.extensions.TiddlyKanban) {
         				var state = jQuery(this).attr("kanbanstate");
         				
         				//Get all the matching workitems for this column
-        				var workItems = jQuery(this).children(".kanbanworkitem[kanbanid=" + tiddlerTitle + "]");
+        				var workItems = jQuery(this).children(".kanbanworkitem[kanbanid=\"" + tiddlerTitle + "\"]");
         				
         				if (tiddler.isTagged(state)) {
 	        				if (workItems.length > 0) {
@@ -562,7 +558,7 @@ if(!version.extensions.TiddlyKanban) {
 	        	else
 	        	{
 	        		//Tiddler was deleted, remove all on display.
-	  				jQuery(".kanbanworkitem[kanbanid=" + tiddlerTitle + "]").remove();
+	  				jQuery(".kanbanworkitem[kanbanid=\"" + tiddlerTitle + "\"]").remove();
 	        	}
         	} 
         	catch(ex) {
