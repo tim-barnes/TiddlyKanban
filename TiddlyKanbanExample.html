@@ -510,15 +510,15 @@ Also see [[AdvancedOptions]]</pre>
 <div title="DefaultTiddlers" creator="Tim" modifier="Tim" created="201111201750" changecount="1">
 <pre>[[KanbanPlugin]]</pre>
 </div>
-<div title="Example" creator="Tim" modifier="Tim" created="201111201758" changecount="1">
-<pre>&lt;&lt;kanban Cat1 Cat2 Cat3&gt;&gt;</pre>
+<div title="Example" creator="Tim" modifier="Tim" created="201111201758" modified="201111242118" changecount="3">
+<pre>&lt;&lt;kanban Cat1 Cat2 Cat3 Cat4 Cat5&gt;&gt;</pre>
 </div>
-<div title="KanbanPlugin" creator="Tim" modifier="Tim" created="201111201756" modified="201111202144" tags="systemConfig" changecount="10">
+<div title="KanbanPlugin" creator="Tim" modifier="Tim" created="201111201756" modified="201111242118" tags="systemConfig" changecount="18">
 <pre>/***
 |''Name''|TiddlyKanban|
 |''Description''|Renders tiddlers into a KANBAN and allows editing by drag-and-drop.|
 |''Maintainer''|Tim Barnes|
-|''Version''|0.9.0|
+|''Version''|0.9.1|
 |''Status''|stable|
 |''Source''|[[https://github.com/tim-barnes/TiddlyKanban]]|
 |''License''|[[http://creativecommons.org/licenses/by-sa/3.0/]]|
@@ -542,11 +542,24 @@ This plugin would not be possible without the excellent dragsort ([[http://drags
 !Changelog
 !!v0.9 (2011-11-20)
 * initial release
+!!v0.9.1 (2011-11-24)
+* Fixed bug in dragsort that failed to recognise changes between lists
 !TODO
 * Work card colours
 * Work card tracking
-!Known Issues
+User requests
+* min/max button for each tiddler, and a whole column min/max function
+* vertical size limit of work items
+* direct drop of links into kanban columns?
+* Saving position of tiddlers
+* Create static copy of current kanban in new tiddler.
+* Wild card columns
+* Field based columns
+!Known Issues / bugs
 * Autoupdate does not work for tiddlers with spaces in the titles.
+* --Tiddler does not always get updated on blank columns - broken itemDrop?--
+* Default CSS does not obey local stylesheet conventions - particularly container div height.
+* Need to auto include [[StyleSheetKanbanPlugin]] into the [[StyleSheet]] tiddler.
 !Code
 ***/
 //{{{
@@ -599,9 +612,300 @@ This plugin would not be possible without the excellent dragsort ([[http://drags
 if(!version.extensions.TiddlyKanban) {
     version.extensions.TiddlyKanban = {installed:true};
 
-	// jQuery List DragSort v0.4.3
-	// License: http://dragsort.codeplex.com/license
-	(function(b){b.fn.dragsort=function(k){var d=b.extend({},b.fn.dragsort.defaults,k),g=[],a=null,j=null;this.selector&amp;&amp;b(&quot;head&quot;).append(&quot;&lt;style type='text/css'&gt;&quot;+(this.selector.split(&quot;,&quot;).join(&quot; &quot;+d.dragSelector+&quot;,&quot;)+&quot; &quot;+d.dragSelector)+&quot; { cursor: pointer; }&lt;/style&gt;&quot;);this.each(function(k,i){b(i).is(&quot;table&quot;)&amp;&amp;b(i).children().size()==1&amp;&amp;b(i).children().is(&quot;tbody&quot;)&amp;&amp;(i=b(i).children().get(0));var m={draggedItem:null,placeHolderItem:null,pos:null,offset:null,offsetLimit:null,scroll:null,container:i,init:function(){b(this.container).attr(&quot;data-listIdx&quot;, k).mousedown(this.grabItem).find(d.dragSelector).css(&quot;cursor&quot;,&quot;pointer&quot;);b(this.container).children(d.itemSelector).each(function(a){b(this).attr(&quot;data-itemIdx&quot;,a)})},grabItem:function(e){if(!(e.which!=1||b(e.target).is(d.dragSelectorExclude))){for(var c=e.target;!b(c).is(&quot;[data-listIdx='&quot;+b(this).attr(&quot;data-listIdx&quot;)+&quot;'] &quot;+d.dragSelector);){if(c==this)return;c=c.parentNode}a!=null&amp;&amp;a.draggedItem!=null&amp;&amp;a.dropItem();b(e.target).css(&quot;cursor&quot;,&quot;move&quot;);a=g[b(this).attr(&quot;data-listIdx&quot;)];a.draggedItem= b(c).closest(d.itemSelector);var c=parseInt(a.draggedItem.css(&quot;marginTop&quot;)),f=parseInt(a.draggedItem.css(&quot;marginLeft&quot;));a.offset=a.draggedItem.offset();a.offset.top=e.pageY-a.offset.top+(isNaN(c)?0:c)-1;a.offset.left=e.pageX-a.offset.left+(isNaN(f)?0:f)-1;if(!d.dragBetween)c=b(a.container).outerHeight()==0?Math.max(1,Math.round(0.5+b(a.container).children(d.itemSelector).size()*a.draggedItem.outerWidth()/b(a.container).outerWidth()))*a.draggedItem.outerHeight():b(a.container).outerHeight(),a.offsetLimit= b(a.container).offset(),a.offsetLimit.right=a.offsetLimit.left+b(a.container).outerWidth()-a.draggedItem.outerWidth(),a.offsetLimit.bottom=a.offsetLimit.top+c-a.draggedItem.outerHeight();var c=a.draggedItem.height(),f=a.draggedItem.width(),h=a.draggedItem.attr(&quot;style&quot;);a.draggedItem.attr(&quot;data-origStyle&quot;,h?h:&quot;&quot;);d.itemSelector==&quot;tr&quot;?(a.draggedItem.children().each(function(){b(this).width(b(this).width())}),a.placeHolderItem=a.draggedItem.clone().attr(&quot;data-placeHolder&quot;,!0),a.draggedItem.after(a.placeHolderItem), a.placeHolderItem.children().each(function(){b(this).css({borderWidth:0,width:b(this).width()+1,height:b(this).height()+1}).html(&quot;&amp;nbsp;&quot;)})):(a.draggedItem.after(d.placeHolderTemplate),a.placeHolderItem=a.draggedItem.next().css({height:c,width:f}).attr(&quot;data-placeHolder&quot;,!0));a.draggedItem.css({position:&quot;absolute&quot;,opacity:0.8,&quot;z-index&quot;:999,height:c,width:f});b(g).each(function(a,b){b.createDropTargets();b.buildPositionTable()});a.scroll={moveX:0,moveY:0,maxX:b(document).width()-b(window).width(), maxY:b(document).height()-b(window).height()};a.scroll.scrollY=window.setInterval(function(){if(d.scrollContainer!=window)b(d.scrollContainer).scrollTop(b(d.scrollContainer).scrollTop()+a.scroll.moveY);else{var c=b(d.scrollContainer).scrollTop();if(a.scroll.moveY&gt;0&amp;&amp;c&lt;a.scroll.maxY||a.scroll.moveY&lt;0&amp;&amp;c&gt;0)b(d.scrollContainer).scrollTop(c+a.scroll.moveY),a.draggedItem.css(&quot;top&quot;,a.draggedItem.offset().top+a.scroll.moveY+1)}},10);a.scroll.scrollX=window.setInterval(function(){if(d.scrollContainer!=window)b(d.scrollContainer).scrollLeft(b(d.scrollContainer).scrollLeft()+ a.scroll.moveX);else{var c=b(d.scrollContainer).scrollLeft();if(a.scroll.moveX&gt;0&amp;&amp;c&lt;a.scroll.maxX||a.scroll.moveX&lt;0&amp;&amp;c&gt;0)b(d.scrollContainer).scrollLeft(c+a.scroll.moveX),a.draggedItem.css(&quot;left&quot;,a.draggedItem.offset().left+a.scroll.moveX+1)}},10);a.setPos(e.pageX,e.pageY);b(document).bind(&quot;selectstart&quot;,a.stopBubble);b(document).bind(&quot;mousemove&quot;,a.swapItems);b(document).bind(&quot;mouseup&quot;,a.dropItem);d.scrollContainer!=window&amp;&amp;b(window).bind(&quot;DOMMouseScroll mousewheel&quot;,a.wheel);return!1}},setPos:function(e, c){var f=c-this.offset.top,h=e-this.offset.left;d.dragBetween||(f=Math.min(this.offsetLimit.bottom,Math.max(f,this.offsetLimit.top)),h=Math.min(this.offsetLimit.right,Math.max(h,this.offsetLimit.left)));this.draggedItem.parents().each(function(){if(b(this).css(&quot;position&quot;)!=&quot;static&quot;&amp;&amp;(!b.browser.mozilla||b(this).css(&quot;display&quot;)!=&quot;table&quot;)){var a=b(this).offset();f-=a.top;h-=a.left;return!1}});if(d.scrollContainer==window)c-=b(window).scrollTop(),e-=b(window).scrollLeft(),c=Math.max(0,c-b(window).height()+ 5)+Math.min(0,c-5),e=Math.max(0,e-b(window).width()+5)+Math.min(0,e-5);else var l=b(d.scrollContainer),g=l.offset(),c=Math.max(0,c-l.height()-g.top)+Math.min(0,c-g.top),e=Math.max(0,e-l.width()-g.left)+Math.min(0,e-g.left);a.scroll.moveX=e==0?0:e*d.scrollSpeed/Math.abs(e);a.scroll.moveY=c==0?0:c*d.scrollSpeed/Math.abs(c);this.draggedItem.css({top:f,left:h})},wheel:function(e){if((b.browser.safari||b.browser.mozilla)&amp;&amp;a&amp;&amp;d.scrollContainer!=window){var c=b(d.scrollContainer),f=c.offset();e.pageX&gt;f.left&amp;&amp; e.pageX&lt;f.left+c.width()&amp;&amp;e.pageY&gt;f.top&amp;&amp;e.pageY&lt;f.top+c.height()&amp;&amp;(f=e.detail?e.detail*5:e.wheelDelta/-2,c.scrollTop(c.scrollTop()+f),e.preventDefault())}},buildPositionTable:function(){var a=this.draggedItem==null?null:this.draggedItem.get(0),c=[];b(this.container).children(d.itemSelector).each(function(d,h){if(h!=a){var g=b(h).offset();g.right=g.left+b(h).width();g.bottom=g.top+b(h).height();g.elm=h;c.push(g)}});this.pos=c},dropItem:function(){if(a.draggedItem!=null){b(a.container).find(d.dragSelector).css(&quot;cursor&quot;, &quot;pointer&quot;);a.placeHolderItem.before(a.draggedItem);var e=a.draggedItem.attr(&quot;data-origStyle&quot;);a.draggedItem.attr(&quot;style&quot;,e);e==&quot;&quot;&amp;&amp;a.draggedItem.removeAttr(&quot;style&quot;);a.draggedItem.removeAttr(&quot;data-origStyle&quot;);a.placeHolderItem.remove();b(&quot;[data-dropTarget]&quot;).remove();window.clearInterval(a.scroll.scrollY);window.clearInterval(a.scroll.scrollX);var c=!1;b(g).each(function(){b(this.container).children(d.itemSelector).each(function(a){parseInt(b(this).attr(&quot;data-itemIdx&quot;))!=a&amp;&amp;(c=!0,b(this).attr(&quot;data-itemIdx&quot;, a))})});c&amp;&amp;d.dragEnd.apply(a.draggedItem);a.draggedItem=null;b(document).unbind(&quot;selectstart&quot;,a.stopBubble);b(document).unbind(&quot;mousemove&quot;,a.swapItems);b(document).unbind(&quot;mouseup&quot;,a.dropItem);d.scrollContainer!=window&amp;&amp;b(window).unbind(&quot;DOMMouseScroll mousewheel&quot;,a.wheel);return!1}},stopBubble:function(){return!1},swapItems:function(e){if(a.draggedItem==null)return!1;a.setPos(e.pageX,e.pageY);for(var c=a.findPos(e.pageX,e.pageY),f=a,h=0;c==-1&amp;&amp;d.dragBetween&amp;&amp;h&lt;g.length;h++)c=g[h].findPos(e.pageX, e.pageY),f=g[h];if(c==-1||b(f.pos[c].elm).attr(&quot;data-placeHolder&quot;))return!1;j==null||j.top&gt;a.draggedItem.offset().top||j.left&gt;a.draggedItem.offset().left?b(f.pos[c].elm).before(a.placeHolderItem):b(f.pos[c].elm).after(a.placeHolderItem);b(g).each(function(a,b){b.createDropTargets();b.buildPositionTable()});j=a.draggedItem.offset();return!1},findPos:function(a,b){for(var d=0;d&lt;this.pos.length;d++)if(this.pos[d].left&lt;a&amp;&amp;this.pos[d].right&gt;a&amp;&amp;this.pos[d].top&lt;b&amp;&amp;this.pos[d].bottom&gt;b)return d;return-1}, createDropTargets:function(){d.dragBetween&amp;&amp;b(g).each(function(){var d=b(this.container).find(&quot;[data-placeHolder]&quot;),c=b(this.container).find(&quot;[data-dropTarget]&quot;);d.size()&gt;0&amp;&amp;c.size()&gt;0?c.remove():d.size()==0&amp;&amp;c.size()==0&amp;&amp;(b(this.container).append(a.placeHolderItem.removeAttr(&quot;data-placeHolder&quot;).clone().attr(&quot;data-dropTarget&quot;,!0)),a.placeHolderItem.attr(&quot;data-placeHolder&quot;,!0))})}};m.init();g.push(m)});return this};b.fn.dragsort.defaults={itemSelector:&quot;li&quot;,dragSelector:&quot;li&quot;,dragSelectorExclude:&quot;input, textarea, a[href]&quot;, dragEnd:function(){},dragBetween:!1,placeHolderTemplate:&quot;&lt;li&gt;&amp;nbsp;&lt;/li&gt;&quot;,scrollContainer:window,scrollSpeed:5}})(jQuery);
+// jQuery List DragSort v0.4
+// Website: http://dragsort.codeplex.com/
+// License: http://dragsort.codeplex.com/license
+// Includes bugfix by Tim Barnes 24-Nov-2011
+(function($) {
+
+	$.fn.dragsort = function(options) {
+		var opts = $.extend({}, $.fn.dragsort.defaults, options);
+		var lists = [];
+		var list = null, lastPos = null;
+		if (this.selector)
+			$(&quot;head&quot;).append(&quot;&lt;style type='text/css'&gt;&quot; + (this.selector.split(&quot;,&quot;).join(&quot; &quot; + opts.dragSelector + &quot;,&quot;) + &quot; &quot; + opts.dragSelector) + &quot; { cursor: pointer; }&lt;/style&gt;&quot;);
+
+		this.each(function(i, cont) {
+
+			if ($(cont).is(&quot;table&quot;) &amp;&amp; $(cont).children().size() == 1 &amp;&amp; $(cont).children().is(&quot;tbody&quot;))
+				cont = $(cont).children().get(0);
+
+			var newList = {
+				draggedItem: null,
+				placeHolderItem: null,
+				pos: null,
+				offset: null,
+				offsetLimit: null,
+				scroll: null,
+				container: cont,
+
+				init: function() {
+					$(this.container).attr(&quot;data-listIdx&quot;, i).mousedown(this.grabItem).find(opts.dragSelector).css(&quot;cursor&quot;, &quot;pointer&quot;);
+					$(this.container).children(opts.itemSelector).each(function(j) { $(this).attr(&quot;data-itemIdx&quot;, j); $(this).attr(&quot;data-parentIdx&quot;, i); });
+				},
+
+				grabItem: function(e) {
+					if (e.which != 1 || $(e.target).is(opts.dragSelectorExclude))
+						return;
+
+					var elm = e.target;
+					while (!$(elm).is(&quot;[data-listIdx='&quot; + $(this).attr(&quot;data-listIdx&quot;) + &quot;'] &quot; + opts.dragSelector)) {
+						if (elm == this) return;
+						elm = elm.parentNode;
+					}
+
+					if (list != null &amp;&amp; list.draggedItem != null)
+						list.dropItem();
+
+					$(e.target).css(&quot;cursor&quot;, &quot;move&quot;);
+
+					list = lists[$(this).attr(&quot;data-listIdx&quot;)];
+					list.draggedItem = $(elm).closest(opts.itemSelector);
+					var mt = parseInt(list.draggedItem.css(&quot;marginTop&quot;));
+					var ml = parseInt(list.draggedItem.css(&quot;marginLeft&quot;));
+					list.offset = list.draggedItem.offset();
+					list.offset.top = e.pageY - list.offset.top + (isNaN(mt) ? 0 : mt) - 1;
+					list.offset.left = e.pageX - list.offset.left + (isNaN(ml) ? 0 : ml) - 1;
+
+					if (!opts.dragBetween) {
+						var containerHeight = $(list.container).outerHeight() == 0 ? Math.max(1, Math.round(0.5 + $(list.container).children(opts.itemSelector).size() * list.draggedItem.outerWidth() / $(list.container).outerWidth())) * list.draggedItem.outerHeight() : $(list.container).outerHeight();
+						list.offsetLimit = $(list.container).offset();
+						list.offsetLimit.right = list.offsetLimit.left + $(list.container).outerWidth() - list.draggedItem.outerWidth();
+						list.offsetLimit.bottom = list.offsetLimit.top + containerHeight - list.draggedItem.outerHeight();
+					}
+
+					var h = list.draggedItem.height();
+					var w = list.draggedItem.width();
+					var orig = list.draggedItem.attr(&quot;style&quot;);
+					list.draggedItem.attr(&quot;data-origStyle&quot;, orig ? orig : &quot;&quot;);
+					if (opts.itemSelector == &quot;tr&quot;) {
+						list.draggedItem.children().each(function() { $(this).width($(this).width()); });
+						list.placeHolderItem = list.draggedItem.clone().attr(&quot;data-placeHolder&quot;, true);
+						list.draggedItem.after(list.placeHolderItem);
+						list.placeHolderItem.children().each(function() { $(this).css({ borderWidth:0, width: $(this).width() + 1, height: $(this).height() + 1 }).html(&quot;&amp;nbsp;&quot;); });
+					} else {
+						list.draggedItem.after(opts.placeHolderTemplate);
+						list.placeHolderItem = list.draggedItem.next().css({ height: h, width: w }).attr(&quot;data-placeHolder&quot;, true);
+					}
+					list.draggedItem.css({ position: &quot;absolute&quot;, opacity: 0.8, &quot;z-index&quot;: 999, height: h, width: w });
+
+					$(lists).each(function(i, l) { l.createDropTargets(); l.buildPositionTable(); });
+
+					list.scroll = { moveX: 0, moveY: 0, maxX: $(document).width() - $(window).width(), maxY: $(document).height() - $(window).height() };
+					list.scroll.scrollY = window.setInterval(function() {
+						if (opts.scrollContainer != window) {
+							$(opts.scrollContainer).scrollTop($(opts.scrollContainer).scrollTop() + list.scroll.moveY);
+							return;
+						}
+						var t = $(opts.scrollContainer).scrollTop();
+						if (list.scroll.moveY &gt; 0 &amp;&amp; t &lt; list.scroll.maxY || list.scroll.moveY &lt; 0 &amp;&amp; t &gt; 0) {
+							$(opts.scrollContainer).scrollTop(t + list.scroll.moveY);
+							list.draggedItem.css(&quot;top&quot;, list.draggedItem.offset().top + list.scroll.moveY + 1);
+						}
+					}, 10);
+					list.scroll.scrollX = window.setInterval(function() {
+						if (opts.scrollContainer != window) {
+							$(opts.scrollContainer).scrollLeft($(opts.scrollContainer).scrollLeft() + list.scroll.moveX);
+							return;
+						}
+						var l = $(opts.scrollContainer).scrollLeft();
+						if (list.scroll.moveX &gt; 0 &amp;&amp; l &lt; list.scroll.maxX || list.scroll.moveX &lt; 0 &amp;&amp; l &gt; 0) {
+							$(opts.scrollContainer).scrollLeft(l + list.scroll.moveX);
+							list.draggedItem.css(&quot;left&quot;, list.draggedItem.offset().left + list.scroll.moveX + 1);
+						}
+					}, 10);
+
+					list.setPos(e.pageX, e.pageY);
+					$(document).bind(&quot;selectstart&quot;, list.stopBubble); //stop ie text selection
+					$(document).bind(&quot;mousemove&quot;, list.swapItems);
+					$(document).bind(&quot;mouseup&quot;, list.dropItem);
+					if (opts.scrollContainer != window)
+						$(window).bind(&quot;DOMMouseScroll mousewheel&quot;, list.wheel);
+					return false; //stop moz text selection
+				},
+
+				setPos: function(x, y) {
+					var top = y - this.offset.top;
+					var left = x - this.offset.left;
+
+					if (!opts.dragBetween) {
+						top = Math.min(this.offsetLimit.bottom, Math.max(top, this.offsetLimit.top));
+						left = Math.min(this.offsetLimit.right, Math.max(left, this.offsetLimit.left));
+					}
+
+					this.draggedItem.parents().each(function() {
+						if ($(this).css(&quot;position&quot;) != &quot;static&quot; &amp;&amp; (!$.browser.mozilla || $(this).css(&quot;display&quot;) != &quot;table&quot;)) {
+							var offset = $(this).offset();
+							top -= offset.top;
+							left -= offset.left;
+							return false;
+						}
+					});
+
+					if (opts.scrollContainer == window) {
+						y -= $(window).scrollTop();
+						x -= $(window).scrollLeft();
+						y = Math.max(0, y - $(window).height() + 5) + Math.min(0, y - 5);
+						x = Math.max(0, x - $(window).width() + 5) + Math.min(0, x - 5);
+					} else {
+						var cont = $(opts.scrollContainer);
+						var offset = cont.offset();
+						y = Math.max(0, y - cont.height() - offset.top) + Math.min(0, y - offset.top);
+						x = Math.max(0, x - cont.width() - offset.left) + Math.min(0, x - offset.left);
+					}
+					
+					list.scroll.moveX = x == 0 ? 0 : x * opts.scrollSpeed / Math.abs(x);
+					list.scroll.moveY = y == 0 ? 0 : y * opts.scrollSpeed / Math.abs(y);
+
+					this.draggedItem.css({ top: top, left: left });
+				},
+				
+				wheel: function(e) {
+					if (($.browser.safari || $.browser.mozilla) &amp;&amp; list &amp;&amp; opts.scrollContainer != window) {
+						var cont = $(opts.scrollContainer);
+						var offset = cont.offset();
+						if (e.pageX &gt; offset.left &amp;&amp; e.pageX &lt; offset.left + cont.width() &amp;&amp; e.pageY &gt; offset.top &amp;&amp; e.pageY &lt; offset.top + cont.height()) {
+							var delta = e.detail ? e.detail * 5 : e.wheelDelta / -2;
+							cont.scrollTop(cont.scrollTop() + delta);
+							e.preventDefault();
+						}
+					}
+				},
+
+				buildPositionTable: function() {
+					var item = this.draggedItem == null ? null : this.draggedItem.get(0);
+					var pos = [];
+					$(this.container).children(opts.itemSelector).each(function(i, elm) {
+						if (elm != item) {
+							var loc = $(elm).offset();
+							loc.right = loc.left + $(elm).width();
+							loc.bottom = loc.top + $(elm).height();
+							loc.elm = elm;
+							pos.push(loc);
+						}
+					});
+					this.pos = pos;
+				},
+
+				dropItem: function() {
+					if (list.draggedItem == null)
+						return;
+
+					$(list.container).find(opts.dragSelector).css(&quot;cursor&quot;, &quot;pointer&quot;);
+					list.placeHolderItem.before(list.draggedItem);
+
+					//list.draggedItem.attr(&quot;style&quot;, &quot;&quot;) doesn't work on IE8 and jQuery 1.5 or lower
+					//list.draggedItem.removeAttr(&quot;style&quot;) doesn't work on chrome and jQuery 1.6 (works jQuery 1.5 or lower)
+					var orig = list.draggedItem.attr(&quot;data-origStyle&quot;);
+					list.draggedItem.attr(&quot;style&quot;, orig);
+					if (orig == &quot;&quot;)
+						list.draggedItem.removeAttr(&quot;style&quot;);
+					list.draggedItem.removeAttr(&quot;data-origStyle&quot;);
+					list.placeHolderItem.remove();
+
+					$(&quot;[data-dropTarget]&quot;).remove();
+
+					window.clearInterval(list.scroll.scrollY);
+					window.clearInterval(list.scroll.scrollX);
+
+					var changed = false;
+					$(lists).each(function(i) {
+						$(this.container).children(opts.itemSelector).each(function(j) {
+							if (parseInt($(this).attr(&quot;data-parentIdx&quot;)) != i) {
+								changed = true;
+								$(this).attr(&quot;data-parentIdx&quot;, i);
+							}
+							
+							if (parseInt($(this).attr(&quot;data-itemIdx&quot;)) != j) {
+								changed = true;
+								$(this).attr(&quot;data-itemIdx&quot;, j);
+							}
+						});
+					});
+					if (changed)
+						opts.dragEnd.apply(list.draggedItem);
+					list.draggedItem = null;
+					$(document).unbind(&quot;selectstart&quot;, list.stopBubble);
+					$(document).unbind(&quot;mousemove&quot;, list.swapItems);
+					$(document).unbind(&quot;mouseup&quot;, list.dropItem);
+					if (opts.scrollContainer != window)
+						$(window).unbind(&quot;DOMMouseScroll mousewheel&quot;, list.wheel);
+					return false;
+				},
+
+				stopBubble: function() { return false; },
+
+				swapItems: function(e) {
+					if (list.draggedItem == null)
+						return false;
+
+					list.setPos(e.pageX, e.pageY);
+
+					var ei = list.findPos(e.pageX, e.pageY);
+					var nlist = list;
+					for (var i = 0; ei == -1 &amp;&amp; opts.dragBetween &amp;&amp; i &lt; lists.length; i++) {
+						ei = lists[i].findPos(e.pageX, e.pageY);
+						nlist = lists[i];
+					}
+
+					if (ei == -1 || $(nlist.pos[ei].elm).attr(&quot;data-placeHolder&quot;))
+						return false;
+
+					if (lastPos == null || lastPos.top &gt; list.draggedItem.offset().top || lastPos.left &gt; list.draggedItem.offset().left)
+						$(nlist.pos[ei].elm).before(list.placeHolderItem);
+					else
+						$(nlist.pos[ei].elm).after(list.placeHolderItem);
+
+					$(lists).each(function(i, l) { l.createDropTargets(); l.buildPositionTable(); });
+					lastPos = list.draggedItem.offset();
+					return false;
+				},
+
+				findPos: function(x, y) {
+					for (var i = 0; i &lt; this.pos.length; i++) {
+						if (this.pos[i].left &lt; x &amp;&amp; this.pos[i].right &gt; x &amp;&amp; this.pos[i].top &lt; y &amp;&amp; this.pos[i].bottom &gt; y)
+							return i;
+					}
+					return -1;
+				},
+
+				createDropTargets: function() {
+					if (!opts.dragBetween)
+						return;
+
+					$(lists).each(function() {
+						var ph = $(this.container).find(&quot;[data-placeHolder]&quot;);
+						var dt = $(this.container).find(&quot;[data-dropTarget]&quot;);
+						if (ph.size() &gt; 0 &amp;&amp; dt.size() &gt; 0)
+							dt.remove();
+						else if (ph.size() == 0 &amp;&amp; dt.size() == 0) {
+							//list.placeHolderItem.clone().removeAttr(&quot;data-placeHolder&quot;) crashes in IE7 and jquery 1.5.1 (doesn't in jquery 1.4.2 or IE8)
+							$(this.container).append(list.placeHolderItem.removeAttr(&quot;data-placeHolder&quot;).clone().attr(&quot;data-dropTarget&quot;, true));
+							list.placeHolderItem.attr(&quot;data-placeHolder&quot;, true);
+						}
+					});
+				}
+			};
+
+			newList.init();
+			lists.push(newList);
+		});
+
+		return this;
+	};
+
+	$.fn.dragsort.defaults = {
+		itemSelector: &quot;li&quot;,
+		dragSelector: &quot;li&quot;,
+		dragSelectorExclude: &quot;input, textarea, a[href]&quot;,
+		dragEnd: function() { },
+		dragBetween: false,
+		placeHolderTemplate: &quot;&lt;li&gt;&amp;nbsp;&lt;/li&gt;&quot;,
+		scrollContainer: window,
+		scrollSpeed: 5
+	};
+
+})(jQuery);
 	//End of dragsort code
 	
     //--
@@ -620,7 +924,7 @@ if(!version.extensions.TiddlyKanban) {
 	        }
     		
     		//Add the update notification
-    		store.addNotification(null, this.tiddler_changed);
+    		store.addNotification(null, config.macros.kanban.tiddler_changed);
     	},
     	
    		handler: function(place,macroName,params)
@@ -783,11 +1087,16 @@ if(!version.extensions.TiddlyKanban) {
         }
     };
 }
-//}}}</pre>
+//}}} 
+
+</pre>
 </div>
 <div title="MainMenu" creator="Tim" modifier="Tim" created="201111201749" modified="201111201749" changecount="2">
 <pre>KanbanPlugin
 [[Example Kanban|Example]]</pre>
+</div>
+<div title="PluginManager" creator="Tim" modifier="Tim" created="201111241948" changecount="1">
+<pre>&lt;&lt;plugins&gt;&gt;</pre>
 </div>
 <div title="SiteSubtitle" creator="Tim" modifier="Tim" created="201111201749" changecount="1">
 <pre>a TiddlyWiki based personal productivity tool</pre>
@@ -795,13 +1104,13 @@ if(!version.extensions.TiddlyKanban) {
 <div title="SiteTitle" creator="Tim" modifier="Tim" created="201111201748" changecount="1">
 <pre>~TiddlyKanban</pre>
 </div>
-<div title="WorkCard1" creator="Tim" modifier="Tim" created="201111201758" modified="201111201819" tags="Cat1" changecount="2">
+<div title="WorkCard1" creator="Tim" modifier="Tim" created="201111201758" modified="201111201819" tags="Cat1" changecount="19">
 <pre>Example work card.  Clicking the link above will open the tiddler.</pre>
 </div>
-<div title="WorkCard2" creator="Tim" modifier="Tim" created="201111201759" modified="201111201801" tags="Cat2" changecount="2">
+<div title="WorkCard2" creator="Tim" modifier="Tim" created="201111201759" modified="201111201801" tags="Cat2" changecount="21">
 <pre>Work cards show ''correct formatting'' for the tiddler.</pre>
 </div>
-<div title="WorkCard3" creator="Tim" modifier="Tim" created="201111201821" tags="Cat2" changecount="1">
+<div title="WorkCard3" creator="Tim" modifier="Tim" created="201111201821" tags="Cat2" changecount="3">
 <pre>and can contain:
 * lists
 * {{{ pre formatted text }}}
